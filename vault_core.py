@@ -1,4 +1,4 @@
-# vault_core.py - COMPLETE WORKING VERSION
+# vault_core.py - COMPLETE WORKING VERSION FOR PYTHON 3.13
 import os
 import json
 import base64
@@ -54,7 +54,7 @@ class DigitalVaultCore:
         if salt is None:
             salt = os.urandom(16)
         
-        # Use a high iteration count to slow down brute-force attacks
+        # CORRECT USAGE FOR MODERN CRYPTOGRAPHY LIBRARY
         kdf = PBKDF2(
             algorithm=hashes.SHA256(),
             length=32,  # 32 bytes = 256 bits for AES-256
