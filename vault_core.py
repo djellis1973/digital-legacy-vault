@@ -1,4 +1,4 @@
-# vault_core.py - COMPLETE WORKING VERSION FOR PYTHON 3.13
+# vault_core.py - COMPLETE WORKING VERSION FOR MODERN CRYPTOGRAPHY
 import os
 import json
 import base64
@@ -54,7 +54,7 @@ class DigitalVaultCore:
         if salt is None:
             salt = os.urandom(16)
         
-        # CORRECT USAGE FOR MODERN CRYPTOGRAPHY LIBRARY
+        # CORRECT: Modern PBKDF2 usage (no backend parameter needed)
         kdf = PBKDF2(
             algorithm=hashes.SHA256(),
             length=32,  # 32 bytes = 256 bits for AES-256
