@@ -1,2 +1,2 @@
-streamlit>=1.28.0
-cryptography>=42.0.8
+streamlit==1.28.2  # Use a specific version you know works
+cryptography==42.0.8
