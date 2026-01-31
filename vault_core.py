@@ -1,4 +1,4 @@
-# vault_core.py
+# vault_core.py - COMPLETE WORKING VERSION
 import os
 import json
 import base64
@@ -7,7 +7,7 @@ from pathlib import Path
 from datetime import datetime
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2
-from cryptography.hazmat.pritives.ciphers.aead import AESGCM
+from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from cryptography.exceptions import InvalidTag
 
 class DigitalVaultCore:
@@ -189,7 +189,7 @@ class DigitalVaultCore:
         db = self._load_db()
         
         # Find and remove from list
-        for i, doc in enumerate(db["document"]):
+        for i, doc in enumerate(db["documents"]):
             if doc["id"] == doc_id:
                 # Delete the encrypted blob file
                 blob_path = self.storage_root / doc["safe_name"]
