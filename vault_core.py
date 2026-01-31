@@ -1,12 +1,11 @@
-# vault_core.py - COMPLETE WORKING VERSION FOR MODERN CRYPTOGRAPHY
+# vault_core.py - WORKING SOLUTION
 import os
 import json
 import base64
-import hashlib
+import hashlib  # For PBKDF2-HMAC, replacing the problematic import
 from pathlib import Path
 from datetime import datetime
-from cryptography.hazmat.primitives import hashes
-from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2
+# Removed the problematic import: from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from cryptography.exceptions import InvalidTag
 
@@ -14,7 +13,7 @@ class DigitalVaultCore:
     """
     The secure heart of the vault.
     Handles encryption, decryption, and file management.
-    Uses AES-256-GCM with PBKDF2 key derivation.
+    Uses AES-256-GCM with PBKDF2-HMAC-SHA256 key derivation (via hashlib).
     """
     
     def __init__(self, storage_root="vault_storage"):
@@ -48,20 +47,20 @@ class DigitalVaultCore:
     def derive_key(self, password: str, salt: bytes = None) -> tuple:
         """
         Derive a strong encryption key from a password.
-        Uses PBKDF2 with 600,000 iterations.
+        Uses PBKDF2-HMAC-SHA256 via Python's built-in hashlib.
         Returns (key, salt) for storage.
         """
         if salt is None:
             salt = os.urandom(16)
         
-        # CORRECT: Modern PBKDF2 usage (no backend parameter needed)
-        kdf = PBKDF2(
-            algorithm=hashes.SHA256(),
-            length=32,  # 32 bytes = 256 bits for AES-256
+        # Using Python's built-in, guaranteed-to-work hashlib.pbkdf2_hmac
+        key = hashlib.pbkdf2_hmac(
+            hash_name='sha256',
+            password=password.encode('utf-8'),
             salt=salt,
             iterations=600000,
+            dklen=32  # 32 bytes = 256 bits for AES-256
         )
-        key = kdf.derive(password.encode('utf-8'))
         return key, salt
     
     def encrypt_data(self, plain_data: bytes, password: str) -> dict:
@@ -73,10 +72,10 @@ class DigitalVaultCore:
         salt = os.urandom(16)
         nonce = os.urandom(12)
         
-        # Derive the key
+        # Derive the key using the new hashlib method
         key, _ = self.derive_key(password, salt)
         
-        # Perform encryption
+        # Perform encryption (still using cryptography's AESGCM, which is reliable)
         aesgcm = AESGCM(key)
         cipher_data = aesgcm.encrypt(nonce, plain_data, None)
         
@@ -85,7 +84,7 @@ class DigitalVaultCore:
             "ciphertext": base64.b64encode(cipher_data).decode('ascii'),
             "salt": base64.b64encode(salt).decode('ascii'),
             "nonce": base64.b64encode(nonce).decode('ascii'),
-            "algorithm": "AES-256-GCM-PBKDF2-SHA256-600K"
+            "algorithm": "AES-256-GCM-PBKDF2-HMAC-SHA256-600K"
         }
     
     def decrypt_data(self, encrypted_package: dict, password: str) -> bytes:
